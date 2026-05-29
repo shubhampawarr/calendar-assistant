@@ -2,6 +2,16 @@ import { NextResponse } from "next/server";
 import { google } from "googleapis";
 import * as chrono from "chrono-node";
 
+function formatLocalDateTime(date: Date) {
+  const pad = (num: number) => String(num).padStart(2, "0");
+
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
+    date.getDate()
+  )}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(
+    date.getSeconds()
+  )}`;
+}
+
 function getCalendarClient() {
   const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
@@ -22,8 +32,7 @@ async function getCalendarIdByName(calendar: any, calendarName?: string) {
   const calendars = list.data.items || [];
 
   const found = calendars.find(
-    (cal: any) =>
-      cal.summary?.toLowerCase() === calendarName.toLowerCase()
+    (cal: any) => cal.summary?.toLowerCase() === calendarName.toLowerCase()
   );
 
   return found?.id || "primary";
@@ -63,13 +72,11 @@ export async function GET() {
     );
 
     return NextResponse.json({
-      events: allEvents
-        .flat()
-        .sort((a: any, b: any) => {
-          const aStart = a.start?.dateTime || a.start?.date || "";
-          const bStart = b.start?.dateTime || b.start?.date || "";
-          return new Date(aStart).getTime() - new Date(bStart).getTime();
-        }),
+      events: allEvents.flat().sort((a: any, b: any) => {
+        const aStart = a.start?.dateTime || a.start?.date || "";
+        const bStart = b.start?.dateTime || b.start?.date || "";
+        return new Date(aStart).getTime() - new Date(bStart).getTime();
+      }),
     });
   } catch (error: any) {
     return NextResponse.json(
@@ -113,8 +120,14 @@ export async function POST(req: Request) {
       calendarId: targetCalendarId,
       requestBody: {
         summary: title,
-        start: { dateTime: startDate.toISOString(), timeZone: "Asia/Kolkata" },
-        end: { dateTime: endDate.toISOString(), timeZone: "Asia/Kolkata" },
+        start: {
+          dateTime: formatLocalDateTime(startDate),
+          timeZone: "Asia/Kolkata",
+        },
+        end: {
+          dateTime: formatLocalDateTime(endDate),
+          timeZone: "Asia/Kolkata",
+        },
       },
     });
 
@@ -165,8 +178,14 @@ export async function PATCH(req: Request) {
       eventId,
       requestBody: {
         summary: title,
-        start: { dateTime: startDate.toISOString(), timeZone: "Asia/Kolkata" },
-        end: { dateTime: endDate.toISOString(), timeZone: "Asia/Kolkata" },
+        start: {
+          dateTime: formatLocalDateTime(startDate),
+          timeZone: "Asia/Kolkata",
+        },
+        end: {
+          dateTime: formatLocalDateTime(endDate),
+          timeZone: "Asia/Kolkata",
+        },
       },
     });
 

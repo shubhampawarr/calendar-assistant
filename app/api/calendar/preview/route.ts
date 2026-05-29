@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import * as chrono from "chrono-node";
 
-function formatSpokenTime(date: Date) {
+function formatTime(date: Date) {
   return date.toLocaleTimeString("en-IN", {
     hour: "numeric",
     minute: "2-digit",
@@ -9,11 +9,9 @@ function formatSpokenTime(date: Date) {
   });
 }
 
-function formatSpokenDate(date: Date) {
+function formatDay(date: Date) {
   return date.toLocaleDateString("en-IN", {
     weekday: "long",
-    day: "numeric",
-    month: "long",
   });
 }
 
@@ -49,9 +47,10 @@ export async function POST(req: Request) {
       title,
       start: startDate.toISOString(),
       end: endDate.toISOString(),
-      spokenSummary: `${title}, ${formatSpokenDate(
+
+      spokenSummary: `${title} ${formatDay(startDate)} ${formatTime(
         startDate
-      )}, ${formatSpokenTime(startDate)} to ${formatSpokenTime(endDate)}`,
+      )} to ${formatTime(endDate)}`,
     });
   } catch (error: any) {
     return NextResponse.json(
